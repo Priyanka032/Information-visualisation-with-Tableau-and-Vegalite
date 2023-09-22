@@ -1,0 +1,368 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "name": "main-data",
+    "url": "https://raw.githubusercontent.com/aditya-talalur-prakash/Information-Visualisation-Assignment-3/main/strikes.csv"
+  },
+  "title": {
+    "text": "Wildlife Impact from Air Strikes in the US",
+    "fontSize": 25,
+    "dx": 285
+  },
+
+   "transform": [
+    {"filter": "datum.height>0"}
+
+    ],
+  "config": {
+    "legend": {
+      "titleFontSize": 15,
+      "labelFontSize": 13,
+      "symbolFillColor": "none" 
+    }
+  },
+  "padding": 0,
+  "vconcat": [
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/aditya-talalur-prakash/Information-Visualisation-Assignment-3/main/us-states.json",
+        "format": {
+          "type": "topojson",
+          "feature": "us"
+        }
+      },
+      "transform": [
+        {
+          "lookup": "id",
+          "from": {
+            "data": {
+              "url": "https://raw.githubusercontent.com/aditya-talalur-prakash/Information-Visualisation-Assignment-3/main/states.csv"
+            },
+            "key": "state-code",
+            "fields": [
+              "name"
+            ]
+          }
+        }
+      ],
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "map_selection",
+              "select": {
+                "type": "point",
+                "resolve": "global",
+                "fields": [
+                  "state"
+                ]
+              }
+            }
+         
+         ],
+          "mark": {
+            "type": "geoshape",
+            "fill": "lightgrey",
+            "stroke": "black"
+          },
+          
+          "encoding": {
+            
+            "tooltip": [
+              {
+              "field": "name",
+              "type": "nominal"}
+            ]
+            
+          },
+          "projection": {
+            "type": "equirectangular"
+          }
+        },
+        {
+          "transform": [
+            {
+              "lookup": "name",
+              "from": {
+                "data": {
+                  "url": "https://raw.githubusercontent.com/aditya-talalur-prakash/Information-Visualisation-Assignment-3/main/strikes.csv"
+                },
+                "key": "state",
+                "fields": [
+                  "state",
+                  "incident_year",
+                  "height",
+                  "speed",
+                  "damage",
+                  "operator"
+                ]
+              }
+            },
+            {
+              "filter": {
+                "param": "year_filter"
+              }
+            },
+            {
+              "filter": {
+                "param": "brush"
+              }
+            },
+            {
+              "filter": {
+                "param": "operator_filter"
+              }
+            }
+          ],
+          "mark": {
+            "type": "geoshape",
+            "stroke": "black"
+          },
+          "encoding": {
+            "color": {
+              "condition": {
+                "param": "map_selection",
+                "field": "height",
+                "type": "quantitative",
+                "title": "Height",
+                "scale": {
+                  "scheme" : "purpleblue" 
+                }
+              },
+              "value": "lightgray"
+            },
+            "opacity": {"value": 1},
+              "tooltip": [
+              {
+              "field": "name",
+              "type": "nominal"},
+              {
+                "field": "height",
+              "type": "quantitative"
+              }
+            ]
+          },
+          "projection": {
+            "type": "equirectangular"
+          }
+        }
+      ],
+      "width": 850,
+      "height": 350
+    },
+    {
+      "hconcat": [
+        {
+          "width": 375,
+          "height": 350,
+          "encoding": {
+            "y": {
+              "field" : "incident_year",
+              "aggregate": "count",
+              "axis": {
+                "title": "Number of Strikes",
+                "labelFontSize": 13,
+                "titleFontSize": 16,
+                "titlePadding": 6,
+                "titleFontWeight": "bold"
+              }
+            },
+            "x": {
+              "field": "incident_year",
+              "type": "nominal",
+              "axis": {
+                "title": "Incident Year",
+                "labelFontSize": 13,
+                "titleFontSize": 16,
+                "titlePadding": 6,
+                "titleFontWeight": "bold"
+              }
+            }
+          },
+           "layer": [
+            {
+              "params": [
+                {
+                  "name": "year_filter",
+                  "select": {
+                    "type": "interval",
+                    "encodings": [
+                      "x"
+                    ],
+                    "resolve": "union"
+                  }
+                }
+              ],
+              "transform": [
+                {
+                  "filter": {
+                    "param": "map_selection"
+                  }
+                },
+                {
+                  "filter": {
+                    "param": "brush"
+                  }
+                },
+                
+                {
+                  "filter": {
+                    "param": "operator_filter"
+                  }
+                }
+              ],
+           "mark": {
+                "type": "bar"
+              },
+              "encoding": {
+                "color": {
+                  "value": "lightgray"
+                }
+              }
+            },
+            {
+              "transform": [
+                {
+                  "filter": {
+                    "param": "year_filter"
+                  }
+                },
+                {
+                  "filter": {
+                    "param": "map_selection"
+                  }
+                },
+                {
+                  "filter": {
+                    "param": "brush"
+                  }
+                },
+                {
+                  "filter": {
+                    "param": "operator_filter"
+                  }
+                }
+              ],
+              "mark": {
+                "type": "bar"
+              },
+              "encoding": {
+                "color": {
+                  "field" : "operator"
+                }
+              }
+            },
+            {
+              "mark": "bar",
+              "encoding": {
+                "color": {
+                  "value": null
+                }
+              }
+            }
+          ]
+        },
+      {
+          "width": 375,
+          "height": 350,
+          "params": [
+            {
+              "name": "brush",
+              "select": {
+                "type": "interval",
+                "resolve": "global"
+              }
+            },
+            {
+              "name": "operator_filter",
+              "select": {
+                "type": "point",
+                "fields": [
+                  "operator"
+                ]
+            },
+          "bind": "legend"
+            }
+          ],
+          "transform": [
+            {
+              "filter": {
+                "param": "map_selection"
+              }
+            },
+            {
+              "filter": {
+                "param": "year_filter"
+              }
+            }
+          ],
+          "mark": "circle",
+          "encoding": {
+            "y": {
+              "field": "height",
+              "type": "quantitative",
+              "axis": {
+                "title": "Height of the strike",
+                "labelFontSize": 13,
+                "titleFontSize": 16,
+                "titlePadding": 6,
+                "titleFontWeight": "bold"
+              }
+            },
+            "x": {
+              "field": "speed",
+              "type": "quantitative",
+              "axis": {
+                "title": "Speed",
+                "labelFontSize": 13,
+                "titleFontSize": 16,
+                "titlePadding": 6,
+                "titleFontWeight": "bold"
+              }
+            },
+            
+            "tooltip": {
+                "field": "phase_of_flt",
+                "type": "nominal"
+              },
+              "size": {
+                "field": "damage",
+                "type": "nominal",
+                "scale" : {
+                  "range": [10,100]
+                  },
+                "legend": {
+                  "title": "Damage",
+                  "titleAlign" : "left",
+                  "orient": "none",
+                  "padding": 10,
+                  "direction": "vertical",
+                  "legendX": 853,
+                  "legendY": 460,
+                  "symbolSize": 10,
+                  "symbolType": "circle"
+                }
+              },
+              "color": {
+              "condition": {
+                "param": "operator_filter",
+                "field" : "operator",
+                "type": "nominal"
+                
+              },
+
+              "value": "lightgray"
+            },
+            "opacity": {
+              "condition": {
+                "param": "operator_filter",
+                "value": 0.7
+              },
+              "value": 0.00
+            }
+         }
+        }
+      ]
+    }
+  ]
+}

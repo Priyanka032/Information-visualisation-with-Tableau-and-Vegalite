@@ -1,0 +1,227 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/colmr/vis_class/master/video_games.csv",
+    "format": {"type": "csv"}
+  },
+  "transform": [{"filter": "datum.EU_Sales > 0"}],
+  "title": {
+    "text": "Video Games Sales Explorer",
+    "anchor": "middle",
+    "fontSize": 32
+  },
+  "config": {
+    "legend": {
+      "titleFontSize": 18,
+      "labelFontSize": 17,
+      "titleFontWeight": "bolder"
+    }
+  },
+  "padding": 10,
+  "vconcat": [
+    {
+      "hconcat": [
+        {
+          "transform": [
+            {"filter": {"param": "genre_param"}},
+            {"filter": {"param": "year_param"}}
+          ],
+          "params": [
+            {
+              "name": "plegend",
+              "select": {"type": "point", "fields": ["Platform"]},
+              "bind": "legend"
+            },
+            {
+              "name": "brush_param",
+              "select": {"type": "interval", "resolve": "union"}
+            }
+          ],
+          "mark": "circle",
+          "encoding": {
+            "x": {
+              "field": "EU_Sales",
+              "type": "quantitative",
+              "scale": {"type": "log", "domain": [0.005, 50]},
+              "axis": {
+                "title": "EU Sales (Millions)",
+                "labelFontSize": 18,
+                "titleFontSize": 20,
+                "titleFontWeight": "bolder",
+                "titlePadding": 8,
+                "labelAngle": 360
+              }
+            },
+            "y": {
+              "field": "Global_Sales",
+              "type": "quantitative",
+              "scale": {"type": "log", "domain": [0.005, 100]},
+              "axis": {
+                "title": "Global Sales (Millions)",
+                "labelFontSize": 18,
+                "titleFontSize": 20,
+                "titleFontWeight": "bolder",
+                "titlePadding": 4
+              }
+            },
+            "color": {
+              "condition": {
+                "param": "brush_param",
+                "field": "Platform",
+                "type": "nominal"
+              },
+              "value": "lightgrey"
+            },
+            "opacity": {
+              "condition": {"param": "plegend", "value": 1},
+              "value": 0.01
+            },
+            "tooltip": {"field": "Name", "type": "nominal"}
+          },
+          "height": 500,
+          "width": 500
+        },
+        {
+          "params": [
+            {
+              "name": "genre_param",
+              "select": {
+                "type": "point",
+                "fields": ["Genre"],
+                "resolve": "union"
+              }
+            },
+            {
+              "name": "brush_param",
+              "select": {"type": "interval", "resolve": "union"}
+            },
+            {
+              "name": "year_param",
+              "select": {
+                "type": "interval",
+                "encodings": ["x"],
+                "resolve": "union"
+              }
+            }
+          ],
+          "transform": [
+            {"filter": {"param": "plegend"}},
+            {"filter": {"param": "brush_param"}},
+            {"filter": {"param": "year_param"}}
+          ],
+          "mark": {"type": "bar"},
+          "encoding": {
+            "x": {
+              "field": "Rank",
+              "type": "quantitative",
+              "axis": {
+                "title": "# Games",
+                "labelFontSize": 18,
+                "titleFontSize": 20,
+                "titleFontWeight": "bolder",
+                "titlePadding": 6
+              },
+              "aggregate": "count"
+            },
+            "y": {
+              "field": "Genre",
+              "type": "nominal",
+              "axis": {
+                "title": null,
+                "labelFontSize": 18,
+                "labelFontWeight": 500
+              },
+              "sort": {"op": "count", "field": "Rank", "order": "descending"}
+            },
+            "opacity": {
+              "condition": {"param": "genre_param", "value": 5},
+              "value": 0.5
+            },
+            "color": {
+              "condition": {
+                "param": "genre_param",
+                "field": "Platform",
+                "type": "nominal"
+              },
+              "value": "lightgrey"
+            }
+          },
+          "height": 500,
+          "width": 250
+        }
+      ]
+    },
+    {
+      "encoding": {
+        "x": {
+          "field": "Year",
+          "type": "nominal",
+          "scale": {"padding": 0.01},
+          "axis": {
+            "title": "Year",
+            "labelFontSize": 18,
+            "titleFontSize": 20,
+            "titlePadding": 8,
+            "titleFontWeight": "bolder",
+            "grid": true,
+            "labelAngle": 360,
+            "labelAlign": "center",
+            "labelFontWeight": 500
+          }
+        },
+        "y": {
+          "field": "Year",
+          "type": "nominal",
+          "aggregate": "count",
+          "axis": {
+            "title": "# Games",
+            "labelFontSize": 18,
+            "titleFontSize": 20,
+            "titleFontWeight": "bolder",
+            "titlePadding": 6
+          }
+        },
+        "color": {
+          "condition": {
+            "param": "year_param",
+            "field": "Platform",
+            "type": "nominal"
+          },
+          "value": "lightgrey"
+        }
+      },
+      "layer": [
+        {
+          "params": [
+            {
+              "name": "year_param",
+              "select": {
+                "type": "interval",
+                "encodings": ["x"],
+                "resolve": "union"
+              }
+            }
+          ],
+          "transform": [
+            {"filter": {"param": "genre_param"}},
+            {"filter": {"param": "brush_param"}},
+            {"filter": {"param": "plegend"}}
+          ],
+          "mark": {"type": "bar"}
+        },
+        {
+          "transform": [
+            {"filter": {"param": "genre_param"}},
+            {"filter": {"param": "brush_param"}},
+            {"filter": {"param": "plegend"}},
+            {"filter": {"param": "year_param"}}
+          ],
+          "mark": {"type": "bar"}
+        },
+        {"mark": {"type": "bar"}, "encoding": {"color": {"value": null}}}
+      ],
+      "height": 100,
+      "width": 900
+    }
+  ]
+}
